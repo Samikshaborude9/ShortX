@@ -5,10 +5,13 @@ import { ConflictException, NotFoundException, ForbiddenException } from '@nestj
 import { UrlsService, generateShortCode } from './urls.service';
 import { Url } from './entities/url.entity';
 
+import { RedisService } from '../redis/redis.service';
+
 describe('UrlsService', () => {
   let service: UrlsService;
   let mockUrlRepo: any;
   let mockConfigService: any;
+  let mockRedisService: any;
 
   beforeEach(async () => {
     mockUrlRepo = {
@@ -26,6 +29,12 @@ describe('UrlsService', () => {
       }),
     };
 
+    mockRedisService = {
+      del: jest.fn().mockResolvedValue(1),
+      get: jest.fn().mockResolvedValue(null),
+      set: jest.fn().mockResolvedValue('OK'),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UrlsService,
@@ -36,6 +45,10 @@ describe('UrlsService', () => {
         {
           provide: ConfigService,
           useValue: mockConfigService,
+        },
+        {
+          provide: RedisService,
+          useValue: mockRedisService,
         },
       ],
     }).compile();
