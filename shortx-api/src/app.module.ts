@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { UrlsModule } from './urls/urls.module';
@@ -22,7 +22,7 @@ import { RedirectModule } from './redirect/redirect.module';
       }),
       inject: [ConfigService],
     }),
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    RedisModule,
     AuthModule,
     UsersModule,
     UrlsModule,
