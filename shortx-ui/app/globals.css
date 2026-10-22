@@ -1,0 +1,97 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Fonts */
+  --font-schibsted: 'Schibsted Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-noto: 'Noto Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-fustat: 'Fustat', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Specific Color Scheme Requirements */
+  --color-black: #000000;
+  --color-gray-text: #505050;
+  --color-light-bg: #f8f8f8;
+  --color-green-upgrade: rgba(90, 225, 76, 0.89);
+  --color-dark-badge: #0e1311;
+  --color-white: #ffffff;
+  --color-transparent-overlay: rgba(0, 0, 0, 0.24);
+
+  /* Secondary Accents */
+  --color-border-light: rgba(0, 0, 0, 0.08);
+  --color-border-white: rgba(255, 255, 255, 0.15);
+  --color-card-bg: rgba(255, 255, 255, 0.85);
+
+  /* Utility Spacing */
+  --spacing-hero-nav-gap: 60px;
+  --spacing-header-search-gap: 44px;
+  --spacing-header-elements-gap: 34px;
+  --spacing-horizontal-padding: 120px;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-inter);
+  background-color: #fdfdfd;
+  color: var(--color-black);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Typography Utility Classes */
+.font-schibsted { font-family: var(--font-schibsted); }
+.font-inter { font-family: var(--font-inter); }
+.font-noto { font-family: var(--font-noto); }
+.font-fustat { font-family: var(--font-fustat); }
+
+.tracking-title { letter-spacing: -4.8px; }
+.tracking-logo { letter-spacing: -1.44px; }
+.tracking-subtitle { letter-spacing: -0.4px; }
+.tracking-menu { letter-spacing: -0.2px; }
+
+/* Custom Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Glassmorphism helpers */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.glass-dark {
+  background: var(--color-transparent-overlay);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
