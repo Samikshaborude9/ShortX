@@ -1,71 +1,71 @@
-﻿# ShortX - Product Roadmap
+# ShortX - Product Roadmap
 
-**Status:** 0/45 tasks complete
-**Current Phase:** Phase 1 - Foundation
+**Status:** 34/45 tasks complete
+**Current Phase:** Phase 6 - Redis Caching
 
 ---
 
 ## Phase 1: Project Foundation & Backend Scaffolding
 **Goal:** NestJS API running with DB connected, basic URL CRUD working, redirect endpoint live.
 
-- [ ] Scaffold NestJS project in shortx-api/
-- [ ] Set up PostgreSQL with Docker Compose (postgres + pgadmin)
-- [ ] Create TypeORM entities: User, Url, UrlClick
-- [ ] Run initial database migrations
-- [ ] Implement URL module: POST /api/urls (create short URL, Base62 generation)
-- [ ] Implement redirect: GET /:shortCode (302 redirect)
-- [ ] Add basic validation with class-validator
-- [ ] Add global error handling and exception filters
-- [ ] Write unit tests for URL generation and redirect logic
+- [x] Scaffold NestJS project in shortx-api/
+- [x] Set up PostgreSQL with Docker Compose (postgres + pgadmin)
+- [x] Create TypeORM entities: User, Url, UrlClick
+- [x] Run initial database migrations
+- [x] Implement URL module: POST /api/urls (create short URL, Base62 generation)
+- [x] Implement redirect: GET /:shortCode (302 redirect)
+- [x] Add basic validation with class-validator
+- [x] Add global error handling and exception filters
+- [x] Write unit tests for URL generation and redirect logic
 
 ---
 
 ## Phase 2: Authentication
 **Goal:** Users can register, login, and their URLs are owned by them.
 
-- [ ] Implement User entity and UsersModule
-- [ ] Implement AuthModule: register, login, logout, /me endpoints
-- [ ] Hash passwords with bcrypt
+- [x] Implement User entity and UsersModule
+- [x] Implement AuthModule: register, login, logout, /me endpoints
+- [x] Hash passwords with bcrypt
 - [ ] Issue JWT access tokens + refresh tokens (httpOnly cookies)
-- [ ] Add AuthGuard to protect /api/urls and /api/analytics
-- [ ] Implement optional auth on POST /api/urls (anon users get short URLs too)
-- [ ] Write auth unit tests
+- [x] Add AuthGuard to protect /api/urls and /api/analytics
+- [x] Implement optional auth on POST /api/urls (anon users get short URLs too)
+- [x] Write auth unit tests
 
 ---
 
 ## Phase 3: Full URL Management
 **Goal:** Users can view, search, paginate, delete and disable their URLs.
 
-- [ ] GET /api/urls - paginated list with search and sort
-- [ ] PATCH /api/urls/:id - toggle active, update custom alias
-- [ ] DELETE /api/urls/:id - soft delete
-- [ ] Add custom alias support on POST /api/urls
-- [ ] Add expiration date support (expires_at field)
-- [ ] Redirect checks: is_active and expires_at before redirecting
+- [x] GET /api/urls - paginated list with search and sort
+- [x] PATCH /api/urls/:id - toggle active, update custom alias
+- [x] DELETE /api/urls/:id - soft delete
+- [x] Add custom alias support on POST /api/urls
+- [x] Add expiration date support (expires_at field)
+- [x] Redirect checks: is_active and expires_at before redirecting
 
 ---
 
 ## Phase 4: Click Tracking & Analytics
 **Goal:** Every redirect is tracked; analytics API returns click stats.
 
-- [ ] Capture click data on redirect (url_id, ip, user_agent, referrer, country)
-- [ ] GET /api/analytics/:urlId - total clicks, unique visitors, clicks today
-- [ ] GET /api/analytics/:urlId/timeseries - clicks per day (last 30 days)
-- [ ] GET /api/analytics/:urlId/breakdown - by country, device, browser, referrer
+- [x] Capture click data on redirect (url_id, ip, user_agent, referrer, country)
+- [x] GET /api/analytics/:urlId - total clicks, unique visitors, clicks today
+- [x] GET /api/analytics/:urlId/timeseries - clicks per day (last 30 days)
+- [x] GET /api/analytics/:urlId/breakdown - by country, device, browser, referrer
 
 ---
 
 ## Phase 5: Frontend (Next.js)
 **Goal:** Beautiful, fully functional UI connecting to the API.
 
-- [ ] Scaffold Next.js 14 project in shortx-ui/
-- [ ] Implement design system (global CSS, color tokens, typography, components)
-- [ ] Landing page: URL input form, hero, result display with copy button
-- [ ] Auth pages: login and register forms with validation
-- [ ] Dashboard: URL list table with search, sort, pagination, copy, delete actions
-- [ ] Analytics page: total clicks, unique visitors, charts (Recharts)
+- [x] Scaffold Next.js 14 project in shortx-ui/
+- [x] Implement design system (global CSS, color tokens, typography, components)
+- [x] Landing page: URL input form, hero, result display with copy button
+- [x] Auth pages: login and register forms with validation
+- [x] Dashboard: URL list table with search, sort, pagination, copy, delete actions
+- [x] Analytics page: total clicks, unique visitors, charts (Recharts)
 - [ ] Dark/light mode toggle
-- [ ] Fully responsive design
+- [x] Fully responsive design
 
 ---
 
@@ -105,8 +105,8 @@
 ## Phase 9: Docker & Infrastructure
 **Goal:** Entire stack runs with a single docker-compose up.
 
-- [ ] Dockerfile for shortx-api (multi-stage build)
-- [ ] Dockerfile for shortx-ui (multi-stage build)
+- [x] Dockerfile for shortx-api (multi-stage build)
+- [x] Dockerfile for shortx-ui (multi-stage build)
 - [ ] docker-compose.yml with all services: ui, api, postgres, redis, kafka, nginx
 - [ ] Nginx config as reverse proxy (/ -> ui, /api -> api, /:shortCode -> api)
 - [ ] Environment variable management (.env.example files)
