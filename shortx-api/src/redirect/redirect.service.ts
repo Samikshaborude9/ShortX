@@ -5,6 +5,7 @@ import * as geoip from 'geoip-lite';
 import { UAParser } from 'ua-parser-js';
 import { Url } from '../urls/entities/url.entity';
 import { UrlClick } from '../analytics/entities/url-click.entity';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class RedirectService {
@@ -13,9 +14,36 @@ export class RedirectService {
     private readonly urlRepo: Repository<Url>,
     @InjectRepository(UrlClick)
     private readonly clickRepo: Repository<UrlClick>,
+    private readonly redisService: RedisService,
   ) {}
 
   async resolve(shortCode: string): Promise<Url> {
+    const cacheKey = `url:short:${shortCode}`;
+
+    // 1. Check Redis Cache
+    const cached = await this.redisService.get(cacheKey);
+    if (cached) {
+      try {
+        const urlData = JSON.parse(cached) as Url;
+
+        if (!urlData.isActive) {
+          throw new GoneException('This URL has been disabled');
+        }
+
+        if (urlData.expiresAt && new Date() > new Date(urlData.expiresAt)) {
+          throw new GoneException('This URL has expired');
+        }
+
+        this.redisService.recordHit();
+        return urlData;
+      } catch (err) {
+        if (err instanceof GoneException) throw err;
+        // Ignore JSON parse errors and fall through to database
+      }
+    }
+
+    // 2. Cache Miss: Query Database
+    this.redisService.recordMiss();
     const url = await this.urlRepo.findOne({ where: { shortCode } });
 
     if (!url) {
@@ -29,6 +57,9 @@ export class RedirectService {
     if (url.expiresAt && new Date() > url.expiresAt) {
       throw new GoneException('This URL has expired');
     }
+
+    // 3. Cache in Redis (1 hour default TTL = 3600 seconds)
+    await this.redisService.set(cacheKey, JSON.stringify(url), 3600);
 
     return url;
   }
@@ -59,7 +90,11 @@ export class RedirectService {
         const b = parser.getBrowser();
         const d = parser.getDevice();
         browser = b.name ? `${b.name}${b.major ? ' ' + b.major : ''}` : undefined;
-        device = d.type ? d.type.charAt(0).toUpperCase() + d.type.slice(1) : (d.model ? `${d.model}` : 'Desktop');
+        device = d.type
+          ? d.type.charAt(0).toUpperCase() + d.type.slice(1)
+          : d.model
+          ? `${d.model}`
+          : 'Desktop';
       }
 
       const click = this.clickRepo.create({

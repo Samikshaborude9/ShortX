@@ -19,13 +19,20 @@ import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
 
 import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
+import { SlidingRateLimitGuard } from '../common/guards/sliding-rate-limit.guard';
+import { RateLimit } from '../common/decorators/rate-limit.decorator';
 
 @Controller('api/urls')
 export class UrlsController {
   constructor(private readonly urlsService: UrlsService) {}
 
   @Post()
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard, SlidingRateLimitGuard)
+  @RateLimit({
+    keyPrefix: 'urls_create',
+    limitResolver: (req) => (req.user?.id ? 100 : 10),
+    windowSeconds: 60,
+  })
   create(@Body() dto: CreateUrlDto, @Request() req) {
     return this.urlsService.create(dto, req.user?.id);
   }

@@ -1,12 +1,16 @@
-import { Controller, Get, Param, Res, Req } from '@nestjs/common';
+import { Controller, Get, Param, Res, Req, UseGuards } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { RedirectService } from './redirect.service';
+import { SlidingRateLimitGuard } from '../common/guards/sliding-rate-limit.guard';
+import { RateLimit } from '../common/decorators/rate-limit.decorator';
 
 @Controller()
 export class RedirectController {
   constructor(private readonly redirectService: RedirectService) {}
 
   @Get(':shortCode')
+  @UseGuards(SlidingRateLimitGuard)
+  @RateLimit({ keyPrefix: 'redirect', limit: 1000, windowSeconds: 60 })
   async redirect(
     @Param('shortCode') shortCode: string,
     @Req() req: Request,

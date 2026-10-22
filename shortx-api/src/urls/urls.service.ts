@@ -11,6 +11,8 @@ import { Url } from './entities/url.entity';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
 
+import { RedisService } from '../redis/redis.service';
+
 const BASE62_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
 export function generateShortCode(length = 6): string {
@@ -27,6 +29,7 @@ export class UrlsService {
     @InjectRepository(Url)
     private readonly urlRepo: Repository<Url>,
     private readonly configService: ConfigService,
+    private readonly redisService: RedisService,
   ) {}
 
   private get baseUrl(): string {
@@ -137,14 +140,29 @@ export class UrlsService {
       url.shortCode = dto.customAlias;
     }
 
-    return this.urlRepo.save(url);
+    const saved = await this.urlRepo.save(url);
+
+    // Invalidate Redis cache
+    await this.redisService.del(`url:short:${saved.shortCode}`);
+    if (saved.customAlias) {
+      await this.redisService.del(`url:short:${saved.customAlias}`);
+    }
+
+    return saved;
   }
 
   async remove(id: string, userId: string): Promise<void> {
     const url = await this.urlRepo.findOne({ where: { id } });
     if (!url) throw new NotFoundException('URL not found');
     if (url.userId !== userId) throw new ForbiddenException();
+
     await this.urlRepo.softDelete(id);
+
+    // Invalidate Redis cache
+    await this.redisService.del(`url:short:${url.shortCode}`);
+    if (url.customAlias) {
+      await this.redisService.del(`url:short:${url.customAlias}`);
+    }
   }
 
   async getStats(id: string, userId: string) {
