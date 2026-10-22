@@ -122,7 +122,10 @@ export default function DashboardPage() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch(`${API_URL}/api/auth/logout`, { method: 'POST' });
+    } catch {}
     localStorage.removeItem('shortx_token');
     localStorage.removeItem('shortx_user');
     router.push('/');

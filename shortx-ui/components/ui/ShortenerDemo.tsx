@@ -24,35 +24,30 @@ export default function ShortenerDemo() {
 
     setLoading(true);
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('shortx_token') : null;
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_URL}/api/urls`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           originalUrl: url,
           ...(customAlias ? { customAlias } : {}),
         }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
+      const data = await res.json().catch(() => null);
+
+      if (res.ok && data) {
         setResult(data);
       } else {
-        // Fallback mockup if API not running locally
-        const mockCode = customAlias || Math.random().toString(36).substring(2, 8);
-        setResult({
-          shortCode: mockCode,
-          shortUrl: `http://localhost:3001/${mockCode}`,
-          originalUrl: url,
-        });
+        setError(data?.message || 'Failed to shorten URL');
       }
-    } catch {
-      // Mockup fallback
-      const mockCode = customAlias || Math.random().toString(36).substring(2, 8);
-      setResult({
-        shortCode: mockCode,
-        shortUrl: `http://localhost:3001/${mockCode}`,
-        originalUrl: url,
-      });
+    } catch (err: any) {
+      setError(err?.message || 'Unable to connect to the server');
     } finally {
       setLoading(false);
     }
