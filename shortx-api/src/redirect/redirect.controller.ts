@@ -1,4 +1,4 @@
-﻿import { Controller, Get, Param, Res, Req } from '@nestjs/common';
+import { Controller, Get, Param, Res, Req } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { RedirectService } from './redirect.service';
 
@@ -12,15 +12,28 @@ export class RedirectController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const originalUrl = await this.redirectService.resolve(shortCode);
+    const url = await this.redirectService.resolve(shortCode);
 
-    // Track click asynchronously (non-blocking)
-    this.redirectService.trackClick(shortCode, {
-      ipAddress: req.ip || req.socket?.remoteAddress,
-      userAgent: req.headers['user-agent'],
-      referrer: req.headers['referer'] as string,
-    }).catch(() => {});
+    // Extract client IP address accurately
+    const xForwardedFor = req.headers['x-forwarded-for'];
+    const ipAddress = Array.isArray(xForwardedFor)
+      ? xForwardedFor[0]
+      : typeof xForwardedFor === 'string'
+      ? xForwardedFor.split(',')[0].trim()
+      : req.ip || req.socket?.remoteAddress;
 
-    return res.redirect(302, originalUrl);
+    const userAgent = req.headers['user-agent'];
+    const referrer = req.headers['referer'] as string;
+
+    // Track click asynchronously with url.id (non-blocking)
+    this.redirectService
+      .trackClick(url.id, {
+        ipAddress,
+        userAgent,
+        referrer,
+      })
+      .catch(() => {});
+
+    return res.redirect(302, url.originalUrl);
   }
 }

@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like, ILike } from 'typeorm';
+import { Repository, ILike } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Url } from './entities/url.entity';
 import { CreateUrlDto } from './dto/create-url.dto';
@@ -13,7 +13,7 @@ import { UpdateUrlDto } from './dto/update-url.dto';
 
 const BASE62_CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-function generateShortCode(length = 6): string {
+export function generateShortCode(length = 6): string {
   let result = '';
   for (let i = 0; i < length; i++) {
     result += BASE62_CHARS[Math.floor(Math.random() * BASE62_CHARS.length)];
@@ -76,26 +76,31 @@ export class UrlsService {
     };
   }
 
-  async findByUser(userId: string, page = 1, limit = 10, search?: string): Promise<[any[], number]> {
+  async findByUser(
+    userId: string,
+    page = 1,
+    limit = 10,
+    search?: string,
+    sort: 'ASC' | 'DESC' = 'DESC',
+  ): Promise<[any[], number]> {
     const skip = (page - 1) * limit;
-    const where: any = { userId };
+    let where: any = { userId };
+
     if (search) {
-      return this.urlRepo.findAndCount({
-        where: [
-          { userId, originalUrl: ILike(`%${search}%`) },
-          { userId, shortCode: ILike(`%${search}%`) },
-        ],
-        order: { createdAt: 'DESC' },
-        skip,
-        take: limit,
-      });
+      where = [
+        { userId, originalUrl: ILike(`%${search}%`) },
+        { userId, shortCode: ILike(`%${search}%`) },
+        { userId, customAlias: ILike(`%${search}%`) },
+      ];
     }
+
     const [urls, total] = await this.urlRepo.findAndCount({
       where,
-      order: { createdAt: 'DESC' },
+      order: { createdAt: sort },
       skip,
       take: limit,
     });
+
     return [
       urls.map((url) => ({
         ...url,
@@ -121,6 +126,17 @@ export class UrlsService {
     if (dto.isActive !== undefined) url.isActive = dto.isActive;
     if (dto.expiresAt !== undefined) url.expiresAt = new Date(dto.expiresAt);
 
+    if (dto.customAlias && dto.customAlias !== url.customAlias) {
+      const existing = await this.urlRepo.findOne({
+        where: [{ shortCode: dto.customAlias }, { customAlias: dto.customAlias }],
+      });
+      if (existing && existing.id !== url.id) {
+        throw new ConflictException('Custom alias already taken');
+      }
+      url.customAlias = dto.customAlias;
+      url.shortCode = dto.customAlias;
+    }
+
     return this.urlRepo.save(url);
   }
 
@@ -128,13 +144,16 @@ export class UrlsService {
     const url = await this.urlRepo.findOne({ where: { id } });
     if (!url) throw new NotFoundException('URL not found');
     if (url.userId !== userId) throw new ForbiddenException();
-    await this.urlRepo.remove(url);
+    await this.urlRepo.softDelete(id);
   }
 
   async getStats(id: string, userId: string) {
     const url = await this.urlRepo.findOne({ where: { id } });
     if (!url) throw new NotFoundException('URL not found');
     if (url.userId && url.userId !== userId) throw new ForbiddenException();
-    return url;
+    return {
+      ...url,
+      shortUrl: `${this.baseUrl}/${url.shortCode}`,
+    };
   }
 }

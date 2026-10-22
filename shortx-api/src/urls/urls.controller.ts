@@ -18,12 +18,14 @@ import { UrlsService } from './urls.service';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
 
+import { OptionalJwtAuthGuard } from '../common/guards/optional-jwt-auth.guard';
+
 @Controller('api/urls')
 export class UrlsController {
   constructor(private readonly urlsService: UrlsService) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(OptionalJwtAuthGuard)
   create(@Body() dto: CreateUrlDto, @Request() req) {
     return this.urlsService.create(dto, req.user?.id);
   }
@@ -35,8 +37,9 @@ export class UrlsController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @Query('search') search?: string,
+    @Query('sort') sort?: 'ASC' | 'DESC',
   ) {
-    const [urls, total] = await this.urlsService.findByUser(req.user.id, page, limit, search);
+    const [urls, total] = await this.urlsService.findByUser(req.user.id, page, limit, search, sort);
     return {
       data: urls,
       total,
