@@ -1,4 +1,4 @@
-﻿import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UrlClick } from './entities/url-click.entity';
@@ -28,8 +28,19 @@ export class AnalyticsService {
       .andWhere('c.createdAt >= :today', { today })
       .getCount();
 
+    // Unique visitors by distinct IP
+    const uniqueResult = await this.clickRepo
+      .createQueryBuilder('c')
+      .select('COUNT(DISTINCT c.ipAddress)', 'count')
+      .where('c.urlId = :urlId', { urlId })
+      .andWhere('c.ipAddress IS NOT NULL')
+      .getRawOne();
+
+    const uniqueVisitors = parseInt(uniqueResult?.count || '0', 10);
+
     return {
       totalClicks,
+      uniqueVisitors: uniqueVisitors || (totalClicks > 0 ? 1 : 0),
       clicksToday,
       url: {
         id: url.id,
@@ -86,11 +97,34 @@ export class AnalyticsService {
       .where('c.urlId = :urlId', { urlId })
       .groupBy('c.browser')
       .orderBy('clicks', 'DESC')
+      .limit(10)
+      .getRawMany();
+
+    const byDevice = await this.clickRepo
+      .createQueryBuilder('c')
+      .select('c.device', 'device')
+      .addSelect('COUNT(*)', 'clicks')
+      .where('c.urlId = :urlId', { urlId })
+      .groupBy('c.device')
+      .orderBy('clicks', 'DESC')
+      .limit(10)
+      .getRawMany();
+
+    const byReferrer = await this.clickRepo
+      .createQueryBuilder('c')
+      .select('c.referrer', 'referrer')
+      .addSelect('COUNT(*)', 'clicks')
+      .where('c.urlId = :urlId', { urlId })
+      .groupBy('c.referrer')
+      .orderBy('clicks', 'DESC')
+      .limit(10)
       .getRawMany();
 
     return {
       byCountry: byCountry.map((r) => ({ country: r.country || 'Unknown', clicks: parseInt(r.clicks, 10) })),
       byBrowser: byBrowser.map((r) => ({ browser: r.browser || 'Unknown', clicks: parseInt(r.clicks, 10) })),
+      byDevice: byDevice.map((r) => ({ device: r.device || 'Desktop', clicks: parseInt(r.clicks, 10) })),
+      byReferrer: byReferrer.map((r) => ({ referrer: r.referrer || 'Direct', clicks: parseInt(r.clicks, 10) })),
     };
   }
 }

@@ -1,4 +1,4 @@
-﻿import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
@@ -33,6 +33,12 @@ export class AuthService {
     return {
       user: { id: user.id, name: user.name, email: user.email },
       accessToken: token,
+    };
+  }
+
+  async logout() {
+    return {
+      message: 'Logged out successfully',
     };
   }
 }
