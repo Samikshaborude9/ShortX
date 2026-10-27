@@ -3,41 +3,71 @@
 import React, { useState } from 'react';
 import {
   StarIcon,
-  AISparkleIcon,
   UpArrowIcon,
-  PaperclipIcon,
-  MicrophoneIcon,
-  SearchIcon,
 } from './Icons';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 interface HeroSectionProps {
   onUpgradeClick?: () => void;
   onSubmitQuery?: (query: string) => void;
 }
 
-export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSectionProps) {
-  const [query, setQuery] = useState('');
-  const [activeModal, setActiveModal] = useState<string | null>(null);
-  const [submittedMessage, setSubmittedMessage] = useState<string | null>(null);
+export default function HeroSection({ onUpgradeClick }: HeroSectionProps) {
+  const [url, setUrl] = useState('');
+  const [customAlias, setCustomAlias] = useState('');
+  const [showAlias, setShowAlias] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [shortenedResult, setShortenedResult] = useState<{
+    shortUrl: string;
+    originalUrl: string;
+    shortCode: string;
+  } | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  const handleSubmit = (e?: React.FormEvent) => {
+  const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!query.trim()) return;
+    if (!url.trim()) return;
 
     setIsLoading(true);
-    if (onSubmitQuery) onSubmitQuery(query);
+    setErrorMessage(null);
+    setShortenedResult(null);
 
-    setTimeout(() => {
-      setSubmittedMessage(`Analysis complete for: "${query}". Processing insights with GPT-4o engine...`);
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('shortx_token') : null;
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch(`${API_URL}/api/urls`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          originalUrl: url.trim(),
+          ...(customAlias.trim() ? { customAlias: customAlias.trim() } : {}),
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (res.ok && data) {
+        setShortenedResult(data);
+        setUrl('');
+      } else {
+        setErrorMessage(data?.message || 'Failed to shorten URL');
+      }
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Unable to connect to the server');
+    } finally {
       setIsLoading(false);
-    }, 1200);
+    }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSubmit();
-    }
+  const handleCopy = () => {
+    if (!shortenedResult) return;
+    navigator.clipboard.writeText(shortenedResult.shortUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -48,7 +78,7 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
         width: '100%',
         paddingLeft: '120px',
         paddingRight: '120px',
-        marginTop: '-50px', /* Hero content moved up 50px */
+        marginTop: '-30px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -66,13 +96,13 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
           textAlign: 'center',
         }}
       >
-        {/* Header Elements Container with 34px gap between badge, title, subtitle */}
+        {/* Header Elements Container */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '34px', /* Gap within header elements: 34px */
+            gap: '24px',
           }}
         >
           {/* Badge Component */}
@@ -90,7 +120,6 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
               border: '1px solid rgba(0, 0, 0, 0.06)',
             }}
           >
-            {/* Dark badge with star icon + "New" text */}
             <span
               style={{
                 background: '#0e1311',
@@ -106,10 +135,10 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
               }}
             >
               <StarIcon className="w-3.5 h-3.5 text-white" />
-              New
+              ShortX
             </span>
             <span style={{ color: '#000000', letterSpacing: '-0.1px' }}>
-              Discover what's possible
+              Blazing Fast URL Shortener & Analytics
             </span>
           </div>
 
@@ -117,15 +146,15 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
           <h1
             className="font-fustat tracking-title"
             style={{
-              fontSize: '80px',
+              fontSize: '76px',
               fontWeight: 700,
-              lineHeight: 1,
+              lineHeight: 1.05,
               color: '#000000',
               textAlign: 'center',
               margin: 0,
             }}
           >
-            Transform Data Quickly
+            Shorten Links Rapidly
           </h1>
 
           {/* Subtitle */}
@@ -135,26 +164,24 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
               fontSize: '20px',
               fontWeight: 500,
               color: '#505050',
-              maxWidth: '736px',
-              width: '542px',
+              maxWidth: '680px',
               textAlign: 'center',
               lineHeight: 1.45,
               margin: 0,
             }}
           >
-            Upload your information and get powerful insights right away. Work smarter and achieve goals effortlessly.
+            Turn long, messy links into clean short URLs. Track real-time visitor analytics, countries, and devices with sub-millisecond redirects.
           </p>
         </div>
 
-        {/* Gap between header and search box: 44px */}
-        <div style={{ height: '44px' }} />
+        {/* Gap */}
+        <div style={{ height: '36px' }} />
 
-        {/* Search Input Box Component */}
+        {/* Shortener Box Component */}
         <div
           style={{
             width: '100%',
             maxWidth: '728px',
-            minHeight: '200px',
             background: 'rgba(0, 0, 0, 0.24)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
@@ -165,11 +192,10 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
             border: '1px solid rgba(255, 255, 255, 0.25)',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
             gap: '12px',
           }}
         >
-          {/* Top Row: Credit info & AI Indicator */}
+          {/* Top Row: Info */}
           <div
             className="font-schibsted"
             style={{
@@ -182,45 +208,15 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
               padding: '0 4px',
             }}
           >
-            {/* Left: "60/450 credits" with green "Upgrade" button */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>60/450 credits</span>
-              <button
-                type="button"
-                onClick={onUpgradeClick}
-                style={{
-                  background: 'rgba(90, 225, 76, 0.89)',
-                  color: '#000000',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '2px 8px',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  transition: 'transform 0.15s, filter 0.15s',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.filter = 'brightness(1.08)')}
-                onMouseLeave={(e) => (e.currentTarget.style.filter = 'none')}
-              >
-                Upgrade
-              </button>
+              <span>⚡ Redis In-Memory Speed</span>
             </div>
-
-            {/* Right: AI icon + "Powered by GPT-4o" */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                opacity: 0.9,
-              }}
-            >
-              <AISparkleIcon className="w-3.5 h-3.5" />
-              <span>Powered by GPT-4o</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', opacity: 0.9 }}>
+              <span>Real-Time Geo & Device Tracking</span>
             </div>
           </div>
 
-          {/* Main Input Area */}
+          {/* Main Input Form */}
           <form
             onSubmit={handleSubmit}
             style={{
@@ -235,35 +231,31 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
             }}
           >
             <input
-              type="text"
-              value={query}
-              onChange={(e) => {
-                if (e.target.value.length <= 3000) {
-                  setQuery(e.target.value);
-                }
-              }}
-              onKeyDown={handleKeyDown}
-              placeholder="Type question..."
+              type="url"
+              required
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="Paste your long link here (e.g. https://yourwebsite.com/very/long/path)..."
               style={{
                 width: '100%',
                 border: 'none',
                 outline: 'none',
                 background: 'transparent',
-                fontSize: '16px',
+                fontSize: '15px',
                 fontFamily: 'var(--font-inter)',
                 color: '#000000',
               }}
             />
 
-            {/* Black circular submit button with up arrow icon (36px size) */}
+            {/* Submit button */}
             <button
               type="submit"
               disabled={isLoading}
               style={{
                 position: 'absolute',
-                right: '12px',
-                width: '36px',
-                height: '36px',
+                right: '10px',
+                width: '38px',
+                height: '38px',
                 borderRadius: '50%',
                 background: '#000000',
                 color: '#ffffff',
@@ -294,6 +286,29 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
             </button>
           </form>
 
+          {/* Custom Alias Option */}
+          {showAlias && (
+            <div style={{ display: 'flex', gap: '8px', animation: 'fadeIn 0.2s ease' }}>
+              <input
+                type="text"
+                value={customAlias}
+                onChange={(e) => setCustomAlias(e.target.value)}
+                placeholder="Optional custom alias (e.g. my-campaign)"
+                style={{
+                  width: '100%',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  border: 'none',
+                  borderRadius: '10px',
+                  padding: '10px 14px',
+                  fontSize: '13px',
+                  outline: 'none',
+                  fontFamily: 'var(--font-inter)',
+                  color: '#000000',
+                }}
+              />
+            </div>
+          )}
+
           {/* Bottom Row */}
           <div
             style={{
@@ -303,14 +318,13 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
               padding: '0 4px',
             }}
           >
-            {/* Left: Three Action Buttons (gray backgrounds #f8f8f8, rounded 6px) */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
                 type="button"
-                onClick={() => setActiveModal('attach')}
+                onClick={() => setShowAlias(!showAlias)}
                 style={{
-                  background: '#f8f8f8',
-                  color: '#000000',
+                  background: showAlias ? '#000000' : '#f8f8f8',
+                  color: showAlias ? '#ffffff' : '#000000',
                   border: 'none',
                   borderRadius: '6px',
                   padding: '6px 12px',
@@ -323,89 +337,34 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
                   gap: '6px',
                   transition: 'background 0.15s',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#eeeeee')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = '#f8f8f8')}
               >
-                <PaperclipIcon className="w-3.5 h-3.5" />
-                Attach
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveModal('voice')}
-                style={{
-                  background: '#f8f8f8',
-                  color: '#000000',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '6px 12px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  fontFamily: 'var(--font-schibsted)',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'background 0.15s',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#eeeeee')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = '#f8f8f8')}
-              >
-                <MicrophoneIcon className="w-3.5 h-3.5" />
-                Voice
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveModal('prompts')}
-                style={{
-                  background: '#f8f8f8',
-                  color: '#000000',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '6px 12px',
-                  fontSize: '13px',
-                  fontWeight: 500,
-                  fontFamily: 'var(--font-schibsted)',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: 'background 0.15s',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#eeeeee')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = '#f8f8f8')}
-              >
-                <SearchIcon className="w-3.5 h-3.5" />
-                Prompts
+                🏷️ {showAlias ? 'Hide Alias' : 'Custom Alias'}
               </button>
             </div>
 
-            {/* Right: Character Counter "0/3,000" (12px, gray) */}
             <span
               style={{
                 fontSize: '12px',
                 color: '#ffffff',
-                opacity: 0.8,
+                opacity: 0.85,
                 fontFamily: 'var(--font-schibsted)',
               }}
             >
-              {query.length.toLocaleString()}/3,000
+              100% Free & Instant
             </span>
           </div>
         </div>
 
-        {/* Output feedback message if query submitted */}
-        {submittedMessage && (
+        {/* Error message */}
+        {errorMessage && (
           <div
             style={{
               marginTop: '16px',
               padding: '12px 20px',
-              background: '#ffffff',
+              background: '#fef2f2',
               borderRadius: '12px',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-              border: '1px solid rgba(0,0,0,0.08)',
-              color: '#000000',
+              border: '1px solid #fecaca',
+              color: '#dc2626',
               fontSize: '14px',
               fontWeight: 500,
               maxWidth: '728px',
@@ -414,97 +373,88 @@ export default function HeroSection({ onUpgradeClick, onSubmitQuery }: HeroSecti
               animation: 'fadeIn 0.3s ease forwards',
             }}
           >
-            ✨ {submittedMessage}
+            ⚠️ {errorMessage}
+          </div>
+        )}
+
+        {/* Shortened URL Result Card */}
+        {shortenedResult && (
+          <div
+            style={{
+              marginTop: '16px',
+              padding: '16px 20px',
+              background: '#ffffff',
+              borderRadius: '14px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+              border: '1px solid rgba(0,0,0,0.08)',
+              maxWidth: '728px',
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              textAlign: 'left',
+              animation: 'fadeIn 0.3s ease forwards',
+            }}
+          >
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '2px' }}>Your shortened link:</div>
+              <a
+                href={shortenedResult.shortUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 600,
+                  color: '#6366f1',
+                  textDecoration: 'none',
+                }}
+              >
+                {shortenedResult.shortUrl}
+              </a>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+              <button
+                type="button"
+                onClick={handleCopy}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: copied ? '#059669' : '#000000',
+                  color: '#ffffff',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'background 0.2s',
+                }}
+              >
+                {copied ? '✓ Copied' : 'Copy'}
+              </button>
+              <a
+                href={shortenedResult.shortUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid #d1d5db',
+                  background: '#f9fafb',
+                  color: '#111827',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                }}
+              >
+                Visit ↗
+              </a>
+            </div>
           </div>
         )}
       </div>
-
-      {/* Interactive Modal for Attach / Voice / Prompts */}
-      {activeModal && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.4)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '24px',
-          }}
-          onClick={() => setActiveModal(null)}
-        >
-          <div
-            style={{
-              background: '#ffffff',
-              borderRadius: '16px',
-              padding: '24px',
-              maxWidth: '420px',
-              width: '100%',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.2)',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
-              {activeModal === 'attach' && '📎 Attach Data File'}
-              {activeModal === 'voice' && '🎙️ Voice Input'}
-              {activeModal === 'prompts' && '🔍 Prompt Library'}
-            </h3>
-            <p style={{ color: '#505050', fontSize: '14px', marginBottom: '20px' }}>
-              {activeModal === 'attach' && 'Drag and drop CSV, JSON, or text files to process instantly.'}
-              {activeModal === 'voice' && 'Speak directly to analyze data or generate custom short links.'}
-              {activeModal === 'prompts' && 'Select pre-configured prompts for rapid data transformation.'}
-            </p>
-            {activeModal === 'prompts' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-                {[
-                  'Summarize traffic sources for short link campaign',
-                  'Predict click conversion rates based on geo data',
-                  'Optimize custom alias naming for brand reach',
-                ].map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => {
-                      setQuery(p);
-                      setActiveModal(null);
-                    }}
-                    style={{
-                      textAlign: 'left',
-                      padding: '10px 14px',
-                      borderRadius: '8px',
-                      border: '1px solid #eee',
-                      background: '#f8f8f8',
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                      fontWeight: 500,
-                    }}
-                  >
-                    💡 {p}
-                  </button>
-                ))}
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={() => setActiveModal(null)}
-              style={{
-                width: '100%',
-                padding: '10px',
-                background: '#000000',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </section>
   );
 }

@@ -33,11 +33,11 @@ export default function Footer() {
             className="font-schibsted tracking-logo"
             style={{
               fontSize: '24px',
-              fontWeight: 600,
+              fontWeight: 700,
               color: '#000000',
             }}
           >
-            Logoipsum
+            ShortX
           </span>
           <p
             className="font-fustat"
@@ -49,7 +49,7 @@ export default function Footer() {
               lineHeight: 1.5,
             }}
           >
-            Transform data quickly with AI insights, real-time analytics, and lightning fast URL intelligence.
+            Intelligent URL shortener with real-time click tracking, custom aliases, and sub-millisecond Redis redirects.
           </p>
         </div>
 
@@ -109,7 +109,7 @@ export default function Footer() {
           color: '#888888',
         }}
       >
-        <div>© 2026 Logoipsum Inc. All rights reserved.</div>
+        <div>© 2026 ShortX Inc. All rights reserved.</div>
         <div style={{ display: 'flex', gap: '20px' }}>
           <span>Privacy Policy</span>
           <span>Terms of Service</span>

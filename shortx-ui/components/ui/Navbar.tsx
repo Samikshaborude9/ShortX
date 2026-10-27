@@ -31,12 +31,12 @@ export default function Navbar({ onOpenLogin, onOpenSignup }: NavbarProps) {
           className="font-schibsted tracking-logo"
           style={{
             fontSize: '24px',
-            fontWeight: 600,
+            fontWeight: 700,
             lineHeight: 1,
             userSelect: 'none',
           }}
         >
-          Logoipsum
+          ShortX
         </span>
       </Link>
 
@@ -113,10 +113,10 @@ export default function Navbar({ onOpenLogin, onOpenSignup }: NavbarProps) {
               }}
             >
               {[
-                { title: 'AI Data Intelligence', desc: 'GPT-4o powered analytics' },
-                { title: 'Link Shortening', desc: 'Custom aliases & rapid redirects' },
-                { title: 'Geo & Device Analytics', desc: 'Real-time audience tracking' },
-                { title: 'API Integration', desc: 'REST API & Webhooks' },
+                { title: 'Link Shortening', desc: 'Custom aliases & rapid Base62 codes' },
+                { title: 'Geo & Device Analytics', desc: 'Real-time clicks, browser & country' },
+                { title: 'Redis In-Memory Cache', desc: 'Sub-millisecond redirect lookups' },
+                { title: 'Developer REST API', desc: 'Programmatic link creation & stats' },
               ].map((item) => (
                 <a
                   key={item.title}
