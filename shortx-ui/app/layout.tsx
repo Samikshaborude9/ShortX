@@ -2,12 +2,13 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Logoipsum - Transform Data Quickly with AI & Link Intelligence',
-  description: 'Upload your information and get powerful insights right away. Work smarter and achieve goals effortlessly.',
-  keywords: 'data analytics, AI insights, URL shortener, link tracking, GPT-4o integration',
+  title: 'ShortX – Intelligent URL Shortener with Real-Time Analytics',
+  description:
+    'ShortX is a blazing-fast URL shortener with custom aliases, click analytics, geo tracking, and Redis-powered redirects.',
+  keywords: 'URL shortener, link shortener, custom alias, analytics, click tracking, geo analytics, ShortX',
   openGraph: {
-    title: 'Logoipsum - Transform Data Quickly',
-    description: 'Upload your information and get powerful insights right away.',
+    title: 'ShortX – Intelligent URL Shortener',
+    description: 'Shorten, brand, and track your links with real-time analytics.',
     type: 'website',
   },
 };
