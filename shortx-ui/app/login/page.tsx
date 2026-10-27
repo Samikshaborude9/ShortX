@@ -34,40 +34,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--color-bg-primary)]">
-      {/* Navbar */}
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--color-bg-primary)' }}>
       <nav className="navbar">
-        <div className="navbar-inner">
+        <div className="container navbar-inner">
           <Link href="/" className="logo">ShortX</Link>
-          <Link href="/register" className="btn btn-ghost btn-sm">
-            Create account →
-          </Link>
         </div>
       </nav>
 
-      {/* Content */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-[420px]">
-          {/* Logo + heading */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-2xl font-bold font-schibsted mb-4 shadow-lg">
-              S
-            </div>
-            <h1 className="text-3xl font-bold text-[var(--color-text-primary)] mb-2 font-schibsted tracking-tight">
-              Welcome back
-            </h1>
-            <p className="text-[var(--color-text-secondary)] text-sm">
-              Sign in to manage your short links &amp; analytics
-            </p>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
+        <div style={{ width: '100%', maxWidth: '420px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <h1 style={{ fontSize: '2rem', marginBottom: '8px' }}>Welcome back</h1>
+            <p style={{ color: 'var(--color-text-secondary)' }}>Sign in to manage your short links</p>
           </div>
 
-          {/* Card */}
-          <div className="card p-8">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <div className="card" style={{ padding: '32px' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {error && <div className="alert alert-error">⚠️ {error}</div>}
 
               <div className="form-group">
-                <label className="form-label">Email address</label>
+                <label className="form-label">Email</label>
                 <input
                   id="email-input"
                   type="email"
@@ -76,7 +62,6 @@ export default function LoginPage() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   required
-                  autoComplete="email"
                 />
               </div>
 
@@ -90,26 +75,23 @@ export default function LoginPage() {
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   required
-                  autoComplete="current-password"
                 />
               </div>
 
               <button
                 id="login-btn"
                 type="submit"
-                className="btn btn-primary w-full py-3.5"
+                className="btn btn-primary"
                 disabled={loading}
+                style={{ width: '100%', padding: '14px' }}
               >
-                {loading ? <><div className="spinner" /> Signing in…</> : 'Sign In →'}
+                {loading ? <><div className="spinner" /> Signing in...</> : 'Sign In →'}
               </button>
             </form>
           </div>
 
-          <p className="text-center mt-5 text-[var(--color-text-secondary)] text-sm">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-indigo-600 font-semibold hover:underline">
-              Create one free
-            </Link>
+          <p style={{ textAlign: 'center', marginTop: '20px', color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+            Don't have an account? <Link href="/register">Create one free</Link>
           </p>
         </div>
       </div>

@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ChevronDownIcon } from './Icons';
-import ThemeToggle from './ThemeToggle';
 
 interface NavbarProps {
   onOpenLogin?: () => void;
@@ -14,27 +13,74 @@ export default function Navbar({ onOpenLogin, onOpenSignup }: NavbarProps) {
   const [featuresOpen, setFeaturesOpen] = useState(false);
 
   return (
-    <nav className="relative z-50 w-full flex items-center justify-between px-8 md:px-[120px] py-4 box-border">
+    <nav
+      style={{
+        position: 'relative',
+        zIndex: 50,
+        width: '100%',
+        padding: '16px 120px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        boxSizing: 'border-box',
+      }}
+    >
       {/* Left: Logo */}
-      <Link href="/" className="no-underline">
-        <span className="font-schibsted tracking-logo text-2xl font-semibold text-black leading-none select-none">
-          ShortX
+      <Link href="/" style={{ textDecoration: 'none', color: '#000000' }}>
+        <span
+          className="font-schibsted tracking-logo"
+          style={{
+            fontSize: '24px',
+            fontWeight: 600,
+            lineHeight: 1,
+            userSelect: 'none',
+          }}
+        >
+          Logoipsum
         </span>
       </Link>
 
-      {/* Center: Navigation */}
-      <div className="hidden md:flex items-center gap-8">
-        <Link href="#platform" className="font-schibsted tracking-menu text-base font-medium text-black no-underline hover:opacity-70 transition-opacity">
+      {/* Center: Navigation Menu items */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '32px',
+        }}
+      >
+        <Link
+          href="#platform"
+          className="font-schibsted tracking-menu"
+          style={{
+            fontSize: '16px',
+            fontWeight: 500,
+            color: '#000000',
+            textDecoration: 'none',
+            transition: 'opacity 0.2s',
+          }}
+        >
           Platform
         </Link>
 
-        {/* Features Dropdown */}
-        <div className="relative">
+        {/* Features with Dropdown */}
+        <div style={{ position: 'relative' }}>
           <button
             type="button"
             onClick={() => setFeaturesOpen(!featuresOpen)}
             onMouseEnter={() => setFeaturesOpen(true)}
-            className="font-schibsted tracking-menu text-base font-medium text-black cursor-pointer flex items-center gap-1.5 p-0 bg-transparent border-none"
+            className="font-schibsted tracking-menu"
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '16px',
+              fontWeight: 500,
+              color: '#000000',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: 0,
+            }}
           >
             Features
             <ChevronDownIcon
@@ -49,51 +95,150 @@ export default function Navbar({ onOpenLogin, onOpenSignup }: NavbarProps) {
           {featuresOpen && (
             <div
               onMouseLeave={() => setFeaturesOpen(false)}
-              className="absolute top-[calc(100%+12px)] -left-4 w-64 bg-white rounded-2xl p-3 shadow-[0_12px_32px_rgba(0,0,0,0.12),0_2px_6px_rgba(0,0,0,0.04)] border border-black/[0.06] z-[100] flex flex-col gap-1 animate-fade-in"
+              style={{
+                position: 'absolute',
+                top: 'calc(100% + 12px)',
+                left: '-16px',
+                width: '260px',
+                background: '#ffffff',
+                borderRadius: '14px',
+                padding: '12px',
+                boxShadow: '0 12px 32px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.04)',
+                border: '1px solid rgba(0,0,0,0.06)',
+                zIndex: 100,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                animation: 'fadeIn 0.2s ease forwards',
+              }}
             >
               {[
+                { title: 'AI Data Intelligence', desc: 'GPT-4o powered analytics' },
                 { title: 'Link Shortening', desc: 'Custom aliases & rapid redirects' },
                 { title: 'Geo & Device Analytics', desc: 'Real-time audience tracking' },
                 { title: 'API Integration', desc: 'REST API & Webhooks' },
-                { title: 'Redis Caching', desc: 'Sub-millisecond redirect speed' },
               ].map((item) => (
                 <a
                   key={item.title}
                   href={`#${item.title.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="px-3 py-2 rounded-lg no-underline hover:bg-[#f8f8f8] transition-colors"
+                  style={{
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    transition: 'background 0.15s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = '#f8f8f8')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
-                  <div className="text-sm font-semibold text-black">{item.title}</div>
-                  <div className="text-xs text-[#505050] mt-0.5">{item.desc}</div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#000000' }}>
+                    {item.title}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#505050', marginTop: '2px' }}>
+                    {item.desc}
+                  </div>
                 </a>
               ))}
             </div>
           )}
         </div>
 
-        <Link href="#community" className="font-schibsted tracking-menu text-base font-medium text-black no-underline hover:opacity-70 transition-opacity">
+        <Link
+          href="#projects"
+          className="font-schibsted tracking-menu"
+          style={{
+            fontSize: '16px',
+            fontWeight: 500,
+            color: '#000000',
+            textDecoration: 'none',
+          }}
+        >
+          Projects
+        </Link>
+
+        <Link
+          href="#community"
+          className="font-schibsted tracking-menu"
+          style={{
+            fontSize: '16px',
+            fontWeight: 500,
+            color: '#000000',
+            textDecoration: 'none',
+          }}
+        >
           Community
         </Link>
 
-        <Link href="#contact" className="font-schibsted tracking-menu text-base font-medium text-black no-underline hover:opacity-70 transition-opacity">
+        <Link
+          href="#contact"
+          className="font-schibsted tracking-menu"
+          style={{
+            fontSize: '16px',
+            fontWeight: 500,
+            color: '#000000',
+            textDecoration: 'none',
+          }}
+        >
           Contact
         </Link>
       </div>
 
-      {/* Right: Auth Buttons & Theme */}
-      <div className="flex items-center gap-3">
-        <ThemeToggle />
+      {/* Right Side Buttons */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+        }}
+      >
+        {/* Sign Up Button (transparent background, 82px width) */}
         <button
           type="button"
           onClick={onOpenSignup}
-          className="font-schibsted tracking-menu w-[82px] h-10 bg-transparent border-none rounded-lg text-[15px] font-medium text-black cursor-pointer inline-flex items-center justify-center hover:bg-black/[0.04] transition-colors"
+          className="font-schibsted tracking-menu"
+          style={{
+            width: '82px',
+            height: '40px',
+            background: 'transparent',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '15px',
+            fontWeight: 500,
+            color: '#000000',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'background 0.2s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(0,0,0,0.04)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         >
           Sign Up
         </button>
 
+        {/* Log In Button (black background, white text, 101px width) */}
         <button
           type="button"
           onClick={onOpenLogin}
-          className="font-schibsted tracking-menu w-[101px] h-10 bg-black text-white border-none rounded-lg text-[15px] font-medium cursor-pointer inline-flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.15)] hover:opacity-90 transition-opacity"
+          className="font-schibsted tracking-menu"
+          style={{
+            width: '101px',
+            height: '40px',
+            background: '#000000',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '15px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+            transition: 'transform 0.15s, opacity 0.2s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
         >
           Log In
         </button>

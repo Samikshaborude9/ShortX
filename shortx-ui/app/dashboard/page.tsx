@@ -2,7 +2,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -31,6 +30,8 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
   const [copied, setCopied] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+
+  // New URL form
   const [showForm, setShowForm] = useState(false);
   const [newUrl, setNewUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -122,7 +123,9 @@ export default function DashboardPage() {
   };
 
   const handleLogout = async () => {
-    try { await fetch(`${API_URL}/api/auth/logout`, { method: 'POST' }); } catch {}
+    try {
+      await fetch(`${API_URL}/api/auth/logout`, { method: 'POST' });
+    } catch {}
     localStorage.removeItem('shortx_token');
     localStorage.removeItem('shortx_user');
     router.push('/');
@@ -131,14 +134,13 @@ export default function DashboardPage() {
   const isExpired = (url: ShortUrl) => url.expiresAt && new Date(url.expiresAt) < new Date();
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg-primary)]">
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-primary)' }}>
       {/* Navbar */}
       <nav className="navbar">
-        <div className="navbar-inner">
+        <div className="container navbar-inner">
           <Link href="/" className="logo">ShortX</Link>
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            <span className="text-[var(--color-text-secondary)] text-sm hidden sm:block">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
               👤 {user?.name}
             </span>
             <button onClick={handleLogout} className="btn btn-ghost btn-sm">Logout</button>
@@ -146,14 +148,12 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <div className="max-w-[1100px] mx-auto px-6 py-10">
-        {/* Page Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 24px' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
           <div>
-            <h1 className="text-2xl font-bold text-[var(--color-text-primary)] font-schibsted tracking-tight">
-              My Links
-            </h1>
-            <p className="text-[var(--color-text-secondary)] text-sm mt-1">
+            <h1 style={{ fontSize: '1.75rem', marginBottom: '4px' }}>My Links</h1>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
               {total} link{total !== 1 ? 's' : ''} total
             </p>
           </div>
@@ -168,10 +168,10 @@ export default function DashboardPage() {
 
         {/* Quick Create Form */}
         {showForm && (
-          <div className="card mb-6">
-            <form onSubmit={handleNewUrl} className="flex flex-col gap-3">
-              {formError && <div className="alert alert-error">⚠️ {formError}</div>}
-              <div className="flex flex-col sm:flex-row gap-3">
+          <div className="card" style={{ marginBottom: '24px', padding: '20px' }}>
+            <form onSubmit={handleNewUrl} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', flexDirection: 'column' }}>
+              {formError && <div className="alert alert-error" style={{ width: '100%' }}>⚠️ {formError}</div>}
+              <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
                 <input
                   id="new-url-input"
                   type="text"
@@ -181,8 +181,8 @@ export default function DashboardPage() {
                   onChange={(e) => setNewUrl(e.target.value)}
                   autoFocus
                 />
-                <button type="submit" className="btn btn-primary whitespace-nowrap" disabled={submitting}>
-                  {submitting ? <><div className="spinner" /> Creating…</> : '⚡ Shorten'}
+                <button type="submit" className="btn btn-primary" disabled={submitting} style={{ whiteSpace: 'nowrap' }}>
+                  {submitting ? <><div className="spinner" /> Creating...</> : '⚡ Shorten'}
                 </button>
                 <button type="button" className="btn btn-ghost" onClick={() => setShowForm(false)}>✕</button>
               </div>
@@ -191,15 +191,16 @@ export default function DashboardPage() {
         )}
 
         {/* Search */}
-        <div className="flex gap-3 mb-5">
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
           <input
             id="search-input"
             type="text"
-            className="form-input max-w-[400px]"
-            placeholder="Search by URL or short code…"
+            className="form-input"
+            placeholder="Search by URL or short code..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { setSearch(searchInput); setPage(1); } }}
+            style={{ maxWidth: '400px' }}
           />
           <button className="btn btn-secondary btn-sm" onClick={() => { setSearch(searchInput); setPage(1); }}>
             Search
@@ -211,20 +212,20 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {error && <div className="alert alert-error mb-4">⚠️ {error}</div>}
+        {error && <div className="alert alert-error" style={{ marginBottom: '16px' }}>⚠️ {error}</div>}
 
         {/* Table */}
         <div className="url-table-container">
           {loading ? (
-            <div className="py-16 text-center text-[var(--color-text-muted)]">
-              <div className="spinner spinner-dark mx-auto mb-3" style={{ width: 36, height: 36 }} />
-              Loading your links…
+            <div style={{ padding: '48px', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+              <div className="spinner" style={{ margin: '0 auto 12px' }} />
+              Loading your links...
             </div>
           ) : urls.length === 0 ? (
-            <div className="py-20 text-center">
-              <div className="text-5xl mb-4">🔗</div>
-              <h3 className="text-lg font-semibold mb-2 text-[var(--color-text-primary)]">No links yet</h3>
-              <p className="text-[var(--color-text-secondary)] text-sm mb-5">Create your first short link to get started</p>
+            <div style={{ padding: '64px', textAlign: 'center' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔗</div>
+              <h3 style={{ marginBottom: '8px' }}>No links yet</h3>
+              <p style={{ color: 'var(--color-text-secondary)', marginBottom: '20px' }}>Create your first short link to get started</p>
               <button className="btn btn-primary" onClick={() => setShowForm(true)}>+ Create Link</button>
             </div>
           ) : (
@@ -242,7 +243,9 @@ export default function DashboardPage() {
                 {urls.map((url) => (
                   <tr key={url.id}>
                     <td>
-                      <div className="url-original" title={url.originalUrl}>{url.originalUrl}</div>
+                      <div className="url-original" title={url.originalUrl}>
+                        {url.originalUrl}
+                      </div>
                     </td>
                     <td>
                       <a href={url.shortUrl} target="_blank" rel="noopener noreferrer" className="url-short">
@@ -258,11 +261,11 @@ export default function DashboardPage() {
                         <span className="badge badge-inactive">● Disabled</span>
                       )}
                     </td>
-                    <td className="text-[var(--color-text-secondary)] text-sm">
+                    <td style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>
                       {new Date(url.createdAt).toLocaleDateString()}
                     </td>
                     <td>
-                      <div className="flex gap-1.5">
+                      <div style={{ display: 'flex', gap: '6px' }}>
                         <button
                           className="btn btn-secondary btn-sm"
                           onClick={() => handleCopy(url.shortUrl, url.id)}
@@ -270,7 +273,11 @@ export default function DashboardPage() {
                         >
                           {copied === url.id ? '✅' : '📋'}
                         </button>
-                        <Link href={`/dashboard/analytics/${url.id}`} className="btn btn-ghost btn-sm" title="Analytics">
+                        <Link
+                          href={`/dashboard/analytics/${url.id}`}
+                          className="btn btn-ghost btn-sm"
+                          title="Analytics"
+                        >
                           📊
                         </Link>
                         <button
@@ -286,7 +293,7 @@ export default function DashboardPage() {
                           disabled={deleting === url.id}
                           title="Delete"
                         >
-                          {deleting === url.id ? <div className="spinner" style={{ width: 14, height: 14 }} /> : '🗑'}
+                          {deleting === url.id ? <div className="spinner" style={{ width: '14px', height: '14px' }} /> : '🗑'}
                         </button>
                       </div>
                     </td>
@@ -299,16 +306,12 @@ export default function DashboardPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-2 mt-6">
-            <button className="btn btn-secondary btn-sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
-              ← Prev
-            </button>
-            <span className="text-[var(--color-text-secondary)] text-sm px-2">
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '24px', alignItems: 'center' }}>
+            <button className="btn btn-secondary btn-sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>← Prev</button>
+            <span style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
               Page {page} of {totalPages}
             </span>
-            <button className="btn btn-secondary btn-sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
-              Next →
-            </button>
+            <button className="btn btn-secondary btn-sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Next →</button>
           </div>
         )}
       </div>
