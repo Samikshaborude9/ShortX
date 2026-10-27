@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { ChevronDownIcon } from './Icons';
+import ThemeToggle from './ThemeToggle';
 
 interface NavbarProps {
   onOpenLogin?: () => void;
@@ -78,8 +79,9 @@ export default function Navbar({ onOpenLogin, onOpenSignup }: NavbarProps) {
         </Link>
       </div>
 
-      {/* Right: Auth Buttons */}
+      {/* Right: Auth Buttons & Theme */}
       <div className="flex items-center gap-3">
+        <ThemeToggle />
         <button
           type="button"
           onClick={onOpenSignup}

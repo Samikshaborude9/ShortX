@@ -46,6 +46,22 @@
   --spacing-horizontal-padding: 120px;
 }
 
+[data-theme="dark"] {
+  --color-black: #ffffff;
+  --color-white: #0f172a;
+  --color-light-bg: #1e293b;
+  --color-card-bg: rgba(30, 41, 59, 0.85);
+
+  --color-bg-primary: #090d16;
+  --color-bg-secondary: #0f172a;
+  --color-bg-tertiary: #1e293b;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-border: #1e293b;
+  --color-border-light: rgba(255, 255, 255, 0.1);
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;

@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -136,6 +137,7 @@ export default function DashboardPage() {
         <div className="navbar-inner">
           <Link href="/" className="logo">ShortX</Link>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <span className="text-[var(--color-text-secondary)] text-sm hidden sm:block">
               👤 {user?.name}
             </span>

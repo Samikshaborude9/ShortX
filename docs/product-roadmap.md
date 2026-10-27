@@ -1,7 +1,7 @@
 # ShortX - Product Roadmap
 
-**Status:** 34/45 tasks complete
-**Current Phase:** Phase 6 - Redis Caching
+**Status:** 42/45 tasks complete
+**Current Phase:** Phase 7 - Kafka & Async Analytics
 
 ---
 
@@ -64,7 +64,7 @@
 - [x] Auth pages: login and register forms with validation
 - [x] Dashboard: URL list table with search, sort, pagination, copy, delete actions
 - [x] Analytics page: total clicks, unique visitors, charts (Recharts)
-- [ ] Dark/light mode toggle
+- [x] Dark/light mode toggle
 - [x] Fully responsive design
 
 ---
@@ -72,18 +72,18 @@
 ## Phase 6: Redis Caching
 **Goal:** Redirect endpoint uses Redis cache to avoid DB on every request.
 
-- [ ] Add Redis to Docker Compose
-- [ ] Implement cache-aside on GET /:shortCode (cache hit -> redirect, miss -> DB + cache)
-- [ ] Set TTL on cache entries (1 hour default)
-- [ ] Cache invalidation on URL update/delete
-- [ ] Add Redis metrics to logs (hit/miss ratio)
+- [x] Add Redis to Docker Compose
+- [x] Implement cache-aside on GET /:shortCode (cache hit -> redirect, miss -> DB + cache)
+- [x] Set TTL on cache entries (1 hour default)
+- [x] Cache invalidation on URL update/delete
+- [x] Add Redis metrics to logs (hit/miss ratio)
 
 ---
 
 ## Phase 7: Kafka & Async Analytics
 **Goal:** Click tracking is decoupled from redirect via Kafka.
 
-- [ ] Add Kafka (+ Zookeeper) to Docker Compose
+- [x] Add Kafka (+ Zookeeper) to Docker Compose
 - [ ] On redirect, emit click event to Kafka topic 'click-events' (fire and forget)
 - [ ] Implement Kafka consumer (analytics worker) to persist click events to DB
 - [ ] Make analytics processing idempotent using event_id UNIQUE constraint
@@ -94,11 +94,11 @@
 ## Phase 8: Rate Limiting
 **Goal:** API is protected against abuse.
 
-- [ ] Add rate limiting middleware using Redis (sliding window)
-- [ ] 100 req/min/user for POST /api/urls (authenticated)
-- [ ] 10 req/min/IP for POST /api/urls (unauthenticated)
-- [ ] 1000 req/min/IP for GET /:shortCode
-- [ ] Return 429 Too Many Requests with Retry-After header
+- [x] Add rate limiting middleware using Redis (sliding window)
+- [x] 100 req/min/user for POST /api/urls (authenticated)
+- [x] 10 req/min/IP for POST /api/urls (unauthenticated)
+- [x] 1000 req/min/IP for GET /:shortCode
+- [x] Return 429 Too Many Requests with Retry-After header
 
 ---
 
@@ -107,10 +107,10 @@
 
 - [x] Dockerfile for shortx-api (multi-stage build)
 - [x] Dockerfile for shortx-ui (multi-stage build)
-- [ ] docker-compose.yml with all services: ui, api, postgres, redis, kafka, nginx
-- [ ] Nginx config as reverse proxy (/ -> ui, /api -> api, /:shortCode -> api)
-- [ ] Environment variable management (.env.example files)
-- [ ] Health checks for all services
+- [x] docker-compose.yml with all services: ui, api, postgres, redis, kafka, nginx
+- [x] Nginx config as reverse proxy (/ -> ui, /api -> api, /:shortCode -> api)
+- [x] Environment variable management (.env.example files)
+- [x] Health checks for all services
 
 ---
 
