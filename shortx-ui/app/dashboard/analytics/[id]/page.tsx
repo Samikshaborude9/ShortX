@@ -11,15 +11,53 @@ interface Summary {
   clicksToday: number;
   url: { shortCode: string; originalUrl: string; createdAt: string };
 }
-interface TimePoint {
-  date: string;
-  clicks: number;
-}
+interface TimePoint { date: string; clicks: number; }
 interface Breakdown {
   byCountry: { country: string; clicks: number }[];
   byBrowser: { browser: string; clicks: number }[];
   byDevice: { device: string; clicks: number }[];
   byReferrer: { referrer: string; clicks: number }[];
+}
+
+function BreakdownCard({
+  title,
+  items,
+  labelKey,
+  gradient,
+}: {
+  title: string;
+  items: { [key: string]: any }[];
+  labelKey: string;
+  gradient: string;
+}) {
+  const max = items[0]?.[Object.keys(items[0]).find((k) => k !== labelKey)!] || 1;
+  const valueKey = Object.keys(items[0] || {}).find((k) => k !== labelKey) || 'clicks';
+
+  return (
+    <div className="card">
+      <h2 className="text-sm font-semibold text-[var(--color-text-secondary)] mb-4">{title}</h2>
+      {items.length === 0 ? (
+        <p className="text-[var(--color-text-muted)] text-sm">No data yet</p>
+      ) : (
+        items.slice(0, 5).map((item, i) => (
+          <div key={i} className="mb-3">
+            <div className="flex justify-between text-sm mb-1">
+              <span className="text-[var(--color-text-primary)] truncate max-w-[180px]" title={item[labelKey]}>
+                {item[labelKey] || 'Unknown'}
+              </span>
+              <span className="text-[var(--color-text-secondary)] ml-2 flex-shrink-0">{item[valueKey]}</span>
+            </div>
+            <div className="h-1.5 bg-[var(--color-bg-tertiary)] rounded-full">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${(item[valueKey] / max) * 100}%`, background: gradient }}
+              />
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
 }
 
 export default function AnalyticsPage() {
@@ -34,10 +72,7 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('shortx_token');
-    if (!token) {
-      router.push('/login');
-      return;
-    }
+    if (!token) { router.push('/login'); return; }
     const headers = { Authorization: `Bearer ${token}` };
 
     Promise.all([
@@ -58,125 +93,81 @@ export default function AnalyticsPage() {
 
   if (loading)
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'var(--color-bg-primary)',
-        }}
-      >
-        <div className="spinner" style={{ width: '40px', height: '40px' }} />
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-primary)]">
+        <div className="spinner spinner-dark" style={{ width: 40, height: 40 }} />
       </div>
     );
 
   if (error)
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: 'var(--color-bg-primary)',
-        }}
-      >
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-bg-primary)]">
         <div className="alert alert-error">Error: {error}</div>
       </div>
     );
 
+  const statCards = [
+    { icon: '📊', value: summary?.totalClicks?.toLocaleString() || '0', label: 'Total Clicks' },
+    { icon: '👥', value: summary?.uniqueVisitors?.toLocaleString() || '0', label: 'Unique Visitors' },
+    { icon: '📈', value: summary?.clicksToday?.toLocaleString() || '0', label: 'Clicks Today' },
+    {
+      icon: '📅',
+      value: summary?.url.createdAt ? new Date(summary.url.createdAt).toLocaleDateString() : '-',
+      label: 'Created',
+    },
+  ];
+
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--color-bg-primary)' }}>
+    <div className="min-h-screen bg-[var(--color-bg-primary)]">
+      {/* Navbar */}
       <nav className="navbar">
-        <div className="container navbar-inner">
-          <Link href="/" className="logo">
-            ShortX
-          </Link>
-          <Link href="/dashboard" className="btn btn-ghost btn-sm">
-            Back to Dashboard
-          </Link>
+        <div className="navbar-inner">
+          <Link href="/" className="logo">ShortX</Link>
+          <Link href="/dashboard" className="btn btn-ghost btn-sm">← Back to Dashboard</Link>
         </div>
       </nav>
 
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 24px' }}>
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '1.75rem', marginBottom: '8px' }}>
+      <div className="max-w-[1100px] mx-auto px-6 py-10">
+        {/* Page header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-[var(--color-text-primary)] font-schibsted tracking-tight mb-2">
             Analytics: /{summary?.url.shortCode}
           </h1>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+          <p className="text-[var(--color-text-secondary)] text-sm truncate max-w-[600px]">
             {summary?.url.originalUrl}
           </p>
         </div>
 
-        <div
-          className="stats-grid"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '16px',
-            marginBottom: '32px',
-          }}
-        >
-          <div className="stat-card">
-            <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📊</div>
-            <div className="stat-value">{summary?.totalClicks?.toLocaleString() || '0'}</div>
-            <div className="stat-label">Total Clicks</div>
-          </div>
-          <div className="stat-card">
-            <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>👥</div>
-            <div className="stat-value">{summary?.uniqueVisitors?.toLocaleString() || '0'}</div>
-            <div className="stat-label">Unique Visitors</div>
-          </div>
-          <div className="stat-card">
-            <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📈</div>
-            <div className="stat-value">{summary?.clicksToday?.toLocaleString() || '0'}</div>
-            <div className="stat-label">Clicks Today</div>
-          </div>
-          <div className="stat-card">
-            <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>📅</div>
-            <div className="stat-value">
-              {summary?.url.createdAt ? new Date(summary.url.createdAt).toLocaleDateString() : '-'}
+        {/* Stats grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          {statCards.map((s, i) => (
+            <div key={i} className="stat-card">
+              <div className="text-2xl mb-2">{s.icon}</div>
+              <div className="stat-value">{s.value}</div>
+              <div className="stat-label">{s.label}</div>
             </div>
-            <div className="stat-label">Created</div>
-          </div>
+          ))}
         </div>
 
-        <div className="card" style={{ marginBottom: '24px' }}>
-          <h2
-            style={{
-              fontSize: '1rem',
-              marginBottom: '20px',
-              color: 'var(--color-text-secondary)',
-              fontWeight: 600,
-            }}
-          >
+        {/* Time series chart */}
+        <div className="card mb-6">
+          <h2 className="text-sm font-semibold text-[var(--color-text-secondary)] mb-5">
             Clicks Over Time (Last 30 Days)
           </h2>
           {timeSeries.length === 0 ? (
-            <p style={{ color: 'var(--color-text-muted)', padding: '20px 0', textAlign: 'center' }}>
-              No click data yet.
-            </p>
+            <p className="text-[var(--color-text-muted)] text-sm text-center py-5">No click data yet.</p>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '4px', height: '160px' }}>
+            <div className="flex items-end gap-1 h-40">
               {timeSeries.map((point, i) => (
                 <div
                   key={i}
-                  style={{
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                  }}
+                  className="flex-1 flex flex-col items-center"
                   title={`${new Date(point.date).toLocaleDateString()}: ${point.clicks} clicks`}
                 >
                   <div
+                    className="w-full rounded-t-sm min-h-[4px] transition-all hover:opacity-80"
                     style={{
-                      width: '100%',
                       height: `${(point.clicks / maxClicks) * 130}px`,
                       background: 'var(--gradient-brand)',
-                      borderRadius: '4px 4px 0 0',
-                      minHeight: '4px',
                     }}
                   />
                 </div>
@@ -185,231 +176,33 @@ export default function AnalyticsPage() {
           )}
         </div>
 
+        {/* Breakdown cards */}
         {breakdown && (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap: '24px',
-            }}
-          >
-            {/* By Country */}
-            <div className="card">
-              <h2
-                style={{
-                  fontSize: '1rem',
-                  marginBottom: '16px',
-                  color: 'var(--color-text-secondary)',
-                  fontWeight: 600,
-                }}
-              >
-                By Country
-              </h2>
-              {breakdown.byCountry?.length === 0 ? (
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>No data yet</p>
-              ) : (
-                breakdown.byCountry?.slice(0, 5).map((item, i) => {
-                  const maxC = breakdown.byCountry[0]?.clicks || 1;
-                  return (
-                    <div key={i} style={{ marginBottom: '10px' }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          marginBottom: '4px',
-                          fontSize: '0.875rem',
-                        }}
-                      >
-                        <span>{item.country || 'Unknown'}</span>
-                        <span style={{ color: 'var(--color-text-secondary)' }}>{item.clicks}</span>
-                      </div>
-                      <div
-                        style={{
-                          height: '6px',
-                          background: 'var(--color-bg-tertiary)',
-                          borderRadius: '3px',
-                        }}
-                      >
-                        <div
-                          style={{
-                            height: '100%',
-                            width: `${(item.clicks / maxC) * 100}%`,
-                            background: 'var(--gradient-brand)',
-                            borderRadius: '3px',
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            {/* By Browser */}
-            <div className="card">
-              <h2
-                style={{
-                  fontSize: '1rem',
-                  marginBottom: '16px',
-                  color: 'var(--color-text-secondary)',
-                  fontWeight: 600,
-                }}
-              >
-                By Browser
-              </h2>
-              {breakdown.byBrowser?.length === 0 ? (
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>No data yet</p>
-              ) : (
-                breakdown.byBrowser?.slice(0, 5).map((item, i) => {
-                  const maxB = breakdown.byBrowser[0]?.clicks || 1;
-                  return (
-                    <div key={i} style={{ marginBottom: '10px' }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          marginBottom: '4px',
-                          fontSize: '0.875rem',
-                        }}
-                      >
-                        <span>{item.browser || 'Unknown'}</span>
-                        <span style={{ color: 'var(--color-text-secondary)' }}>{item.clicks}</span>
-                      </div>
-                      <div
-                        style={{
-                          height: '6px',
-                          background: 'var(--color-bg-tertiary)',
-                          borderRadius: '3px',
-                        }}
-                      >
-                        <div
-                          style={{
-                            height: '100%',
-                            width: `${(item.clicks / maxB) * 100}%`,
-                            background: 'linear-gradient(135deg, #00d4aa, #6c63ff)',
-                            borderRadius: '3px',
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            {/* By Device */}
-            <div className="card">
-              <h2
-                style={{
-                  fontSize: '1rem',
-                  marginBottom: '16px',
-                  color: 'var(--color-text-secondary)',
-                  fontWeight: 600,
-                }}
-              >
-                By Device
-              </h2>
-              {breakdown.byDevice?.length === 0 ? (
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>No data yet</p>
-              ) : (
-                breakdown.byDevice?.slice(0, 5).map((item, i) => {
-                  const maxD = breakdown.byDevice[0]?.clicks || 1;
-                  return (
-                    <div key={i} style={{ marginBottom: '10px' }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          marginBottom: '4px',
-                          fontSize: '0.875rem',
-                        }}
-                      >
-                        <span>{item.device || 'Desktop'}</span>
-                        <span style={{ color: 'var(--color-text-secondary)' }}>{item.clicks}</span>
-                      </div>
-                      <div
-                        style={{
-                          height: '6px',
-                          background: 'var(--color-bg-tertiary)',
-                          borderRadius: '3px',
-                        }}
-                      >
-                        <div
-                          style={{
-                            height: '100%',
-                            width: `${(item.clicks / maxD) * 100}%`,
-                            background: 'linear-gradient(135deg, #ff7b00, #ff007a)',
-                            borderRadius: '3px',
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-
-            {/* By Referrer */}
-            <div className="card">
-              <h2
-                style={{
-                  fontSize: '1rem',
-                  marginBottom: '16px',
-                  color: 'var(--color-text-secondary)',
-                  fontWeight: 600,
-                }}
-              >
-                By Referrer
-              </h2>
-              {breakdown.byReferrer?.length === 0 ? (
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>No data yet</p>
-              ) : (
-                breakdown.byReferrer?.slice(0, 5).map((item, i) => {
-                  const maxR = breakdown.byReferrer[0]?.clicks || 1;
-                  return (
-                    <div key={i} style={{ marginBottom: '10px' }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          marginBottom: '4px',
-                          fontSize: '0.875rem',
-                        }}
-                      >
-                        <span
-                          style={{
-                            maxWidth: '180px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                          }}
-                          title={item.referrer}
-                        >
-                          {item.referrer || 'Direct'}
-                        </span>
-                        <span style={{ color: 'var(--color-text-secondary)' }}>{item.clicks}</span>
-                      </div>
-                      <div
-                        style={{
-                          height: '6px',
-                          background: 'var(--color-bg-tertiary)',
-                          borderRadius: '3px',
-                        }}
-                      >
-                        <div
-                          style={{
-                            height: '100%',
-                            width: `${(item.clicks / maxR) * 100}%`,
-                            background: 'linear-gradient(135deg, #38ef7d, #11998e)',
-                            borderRadius: '3px',
-                          }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <BreakdownCard
+              title="By Country"
+              items={breakdown.byCountry || []}
+              labelKey="country"
+              gradient="linear-gradient(135deg, #6366f1, #8b5cf6)"
+            />
+            <BreakdownCard
+              title="By Browser"
+              items={breakdown.byBrowser || []}
+              labelKey="browser"
+              gradient="linear-gradient(135deg, #00d4aa, #6c63ff)"
+            />
+            <BreakdownCard
+              title="By Device"
+              items={breakdown.byDevice || []}
+              labelKey="device"
+              gradient="linear-gradient(135deg, #ff7b00, #ff007a)"
+            />
+            <BreakdownCard
+              title="By Referrer"
+              items={breakdown.byReferrer || []}
+              labelKey="referrer"
+              gradient="linear-gradient(135deg, #38ef7d, #11998e)"
+            />
           </div>
         )}
       </div>
